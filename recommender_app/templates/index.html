@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" type="text/css" href="{% static 'node_modules/slick-carousel/slick/slick.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'node_modules/slick-carousel/slick/slick-theme.css' %}" />
+    <style>
+        .slick-prev:before,
+        .slick-next:before {
+          color: gray;
+        }
+    </style>
+{% endblock %}
+
+{% block js %}
+    <script src="{% static 'node_modules/slick-carousel/slick/slick.min.js' %}"></script>
+    <script>
+        $(document).ready(function(){
+            $('.rec-item-rev').slick({
+                infinite: false,
+                slidesToShow: 6,
+                slidesToScroll: 1,
+//                lazyLoad: 'progressive'
+            });
+            $('.rec-item').slick({
+                infinite: false,
+                slidesToShow: 6,
+                slidesToScroll: 1,
+//                lazyLoad: 'progressive'
+            });
+
+
+            var reviewed = {{ reviewed |safe }};
+            var recommended = {{ recommend |safe }};
+
+            for (var i = 0; i < reviewed.length; i++) {
+                console.log('request review asin', reviewed[i]);
+                $.get("amazon-detail/" + reviewed[i], function( data ) {
+                    console.log('complete request review', data);
+                    $('#' + data['asin'] + '-title-rev').text(data['title']);
+                    $('#' + data['asin'] + '-image-rev').attr("src",data['image']);
+                    $('#' + data['asin'] + '-progress-rev').hide();
+                });
+
+            }
+
+            for (var i = 0; i < recommended.length; i++) {
+                console.log('request recommend asin', recommended[i]);
+                $.get("amazon-detail/" + recommended[i], function( data ) {
+                    console.log('complete request recommend', data);
+                    $('#' + data['asin'] + '-title').text(data['title']);
+                    $('#' + data['asin'] + '-image').attr("src",data['image']);
+                    $('#' + data['asin'] + '-progress').hide();
+                });
+            }
+
+        });
+    </script>
+    <script>
+    </script>
+{% endblock %}
+
+
+{% block content %}
+<div>
+    <br>
+    <p>Selected User <b>{{ user_id }}</b></p>
+
+    <h5>Reviewed Item</h5>
+    <div class="rec-item-rev">
+    {% for item, tag in reviewed_tag %}
+        <div class="card" style="width: 18rem; margin: 10px">
+          <div class="progress" id="{{ item }}-progress-rev">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+          </div>
+          <img class="card-img-top" src="" alt="Loading image.." id="{{ item }}-image-rev" >
+          <div class="card-body">
+            <p class="card-title"><b>{{ item }}</b></p>
+            <p class="card-text" id="{{ item }}-title-rev">-</p>
+              {% if tag == "short-head" %}
+                <a href="#" class="btn btn-sm btn-secondary">{{ tag }}</a>
+              {% else %}
+                <a href="#" class="btn btn-sm btn-success">{{ tag }}</a>
+              {% endif %}
+          </div>
+        </div>
+    {% endfor %}
+    </div><br>
+
+    <h5>Recommended Item with NDCG@10 <b>{{ ndcg }}</b></h5>
+    <p>with Rating Value in Dataset <b>{{ rating }}</b></p>
+    <div class="rec-item">
+    {% for rec_item, tag in recommend_tag %}
+        <div class="card" style="width: 18rem; margin: 10px">
+          <div class="progress" id="{{ rec_item }}-progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+          </div>
+          <img class="card-img-top" src="" alt="Loading image.." id="{{ rec_item }}-image" >
+          <div class="card-body">
+            <p class="card-title"><b>{{ rec_item }}</b></p>
+            <p class="card-text" id="{{ rec_item }}-title">-</p>
+              {% if tag == "short-head" %}
+                <a href="#" class="btn btn-sm btn-secondary">{{ tag }}</a>
+              {% else %}
+                <a href="#" class="btn btn-sm btn-success">{{ tag }}</a>
+              {% endif %}
+          </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
