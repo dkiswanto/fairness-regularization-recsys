@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-from config import DATASET_DIR
+from config import DATASET_DIR, DATASET_DELIMITER
 
 file_data = open(DATASET_DIR)
 # next(file_data) # skip header
@@ -11,7 +11,7 @@ n_rating_item = {}
 rating_count = 0
 
 for d in file_data:
-    reviewer, item, rating, timestamp = d.split(',')
+    reviewer, item, rating, timestamp = d.split(DATASET_DELIMITER)
 
     if n_rating_item.get(item):
         n_rating_item[item] += 1
@@ -25,6 +25,7 @@ for d in file_data:
 n_user = len(reviewers)
 n_item = len(items)
 density = rating_count / (n_user * n_item)
+print(DATASET_DIR)
 print("Total Users {}".format(n_user))
 print("Total Items {}".format(n_item))
 print("Total Ratings {}".format(rating_count))
@@ -39,6 +40,6 @@ print(ratings[0])
 print(max(ratings))
 plt.axvline(x=len(items) * 0.2, color='red')
 plt.axvline(x=len(items) * 0.8, color='red')
-plt.axis([-10,len(items), 0, ratings[0]])  # x-start, x-end, y-start, y-end
+plt.axis([-10, len(items), 0, ratings[0]])  # x-start, x-end, y-start, y-end
 plt.scatter(range(1, len(items) + 1), ratings, s=1)
 plt.show()

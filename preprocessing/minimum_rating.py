@@ -2,13 +2,13 @@ from datetime import datetime
 
 import pandas as pd
 
-from config import DATASET_DIR
+from config import DATASET_DIR, DATASET_DELIMITER
 
 filename = DATASET_DIR
-MIN_RATING = 60
+MIN_RATING = 80
 
 columns = ['user_id', 'item_id', 'rating', 'timestamp']
-ratings = pd.read_table(filename, sep=',', header=None, names=columns, engine='python')
+ratings = pd.read_table(filename, sep=DATASET_DELIMITER, header=None, names=columns, engine='python')
 
 item_series = ratings.item_id.value_counts()
 user_series = ratings.user_id.value_counts()
