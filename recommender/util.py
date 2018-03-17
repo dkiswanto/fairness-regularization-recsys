@@ -13,7 +13,8 @@ def load_dataset(data_dir):
 
 def divide_item_popularity(dataset_frame):
     # set short-head rating limit bound
-    SHORT_HEAD_BOUND = 85
+    # SHORT_HEAD_BOUND = 85 #???
+    SHORT_HEAD_BOUND = 400  # movielens min 30
 
     item_series = dataset_frame.item_id.value_counts()
     short_head = set()

@@ -85,21 +85,48 @@ def ndcg_test(recommender: FairnessRegALS, user_test, R_dataset):
 
 
 def medium_tail_test(recommender: FairnessRegALS, user_test, medium_tail_set):
-    medium_count = 0
+    """
+    we also measured medium-tail coverage, 
+    the total number of items from the medium-tail set 
+    that are recommended to any user in the test data. 
+    'Controlling Popularity Bias in Learning-to-Rank Recommendation'- RecSys 17
+    """
+    medium_data = {}
     for user in user_test:
         recommendation_list = recommender.top_n_recommendation(user, 10)
         # print("user {} recommend {}".format(user, recommendation_list))
         for item in recommendation_list:
             if item in medium_tail_set:
-                medium_count += 1
+                if medium_data.get(item) is None:
+                    medium_data[item] = 1
+                else:
+                    medium_data[item] += 1
+
+    medium_count = 0
+    total_user_test = len(user_test)
+    for key in medium_data:
+        # it means, every medium tail item has appear in every user test
+        if medium_data.get(key) == total_user_test:
+            medium_count += 1
+    print("max medium tail item", max(medium_data.values()))
+    print("total user test", total_user_test)
     return medium_count
 
 
 def apt_test(recommender: FairnessRegALS, user_test, medium_tail_set):
+
     num_user_test = len(user_test)
     sum_medium = 0
     for user in user_test:
+
         recommendation_list = recommender.top_n_recommendation(user, 10)
-        medium_item = set.intersection(set(recommendation_list), medium_tail_set)
-        sum_medium += len(medium_item) / len(recommendation_list)
+
+        # medium_item = set.intersection(set(recommendation_list), medium_tail_set)
+        # print(user, len(medium_item), len(recommendation_list))
+        total_medium_item = 0
+        for item in recommendation_list:
+            if item in medium_tail_set:
+                total_medium_item += 1
+
+        sum_medium += total_medium_item / len(recommendation_list)
     return sum_medium / num_user_test

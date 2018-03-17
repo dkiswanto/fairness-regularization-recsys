@@ -29,7 +29,7 @@ def main():
         als = FairnessRegALS(df_train=train, n_factor=50)
 
     # train the recommender
-    als.train_data(iteration=1, directory=MODEL_LOCATION)
+    als.train_data(iteration=30, directory=MODEL_LOCATION)
     als.save_data(MODEL_LOCATION)
 
 if __name__ == '__main__':

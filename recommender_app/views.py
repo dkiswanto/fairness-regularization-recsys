@@ -15,11 +15,11 @@ dataset_frame = load_dataset(DATASET_DIR)
 R_dataset = dataframe_to_matrix(dataset_frame)
 users_list = dataset_frame.user_id.unique()
 
-# load recommender
-als = FairnessRegALS.load_data(MODEL_LOCATION)
-
 # divide item popularity
 short_head, medium_tail = divide_item_popularity(dataset_frame)
+
+# load recommender
+als = FairnessRegALS.load_data(MODEL_LOCATION)
 
 
 def index(request, user_id):
@@ -30,6 +30,9 @@ def index(request, user_id):
         user_selected = user_id
 
     # get recommendation
+    if als is None:
+        return HttpResponse("model recommender not loaded correctly")
+
     user_idx = als.user_index.get_loc(user_selected)
     recommend, recommend_index = als.top_n_recommendation(
         user_selected, 10, with_index=True, with_reviewed=False)
