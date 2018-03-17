@@ -14,7 +14,7 @@ def main():
     if als is None:
 
         # prepare dataset
-        ratings_df = load_dataset(DATASET_DIR, separator=',')
+        ratings_df = load_dataset(DATASET_DIR)
         train, test = train_test_split(ratings_df, test_size=0.2)
         print("total user dataset: {}, item dataset: {}"
               .format(ratings_df.user_id.unique().shape, ratings_df.item_id.unique().shape))
@@ -29,7 +29,7 @@ def main():
         als = FairnessRegALS(df_train=train, n_factor=50)
 
     # train the recommender
-    als.train_data(iteration=10, directory=MODEL_LOCATION)
+    als.train_data(iteration=1, directory=MODEL_LOCATION)
     als.save_data(MODEL_LOCATION)
 
 if __name__ == '__main__':

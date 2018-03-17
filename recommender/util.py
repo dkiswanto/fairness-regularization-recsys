@@ -1,9 +1,11 @@
 import pandas as pd
 
+from config import DATASET_DELIMITER
 
-def load_dataset(data_dir, separator='::'):
+
+def load_dataset(data_dir):
     columns = ['user_id', 'item_id', 'rating', 'timestamp']
-    df = pd.read_table(data_dir, sep=separator, header=None, names=columns,
+    df = pd.read_table(data_dir, sep=DATASET_DELIMITER, header=None, names=columns,
                        engine='python')
     print('load data set done')
     return df

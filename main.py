@@ -9,7 +9,7 @@ from recommender.util import load_dataset, divide_item_popularity, dataframe_to_
 def main():
 
     # load dataset
-    ratings_df = load_dataset(DATASET_DIR, separator=',')
+    ratings_df = load_dataset(DATASET_DIR)
 
     # divide set popularity
     short_head, medium_tail = divide_item_popularity(ratings_df)

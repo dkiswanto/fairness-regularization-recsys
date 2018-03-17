@@ -8,18 +8,17 @@ from config import DATASET_DIR, MODEL_LOCATION
 from recommender.evaluation import ndcg_at_k
 from recommender.fairness_reg_als import FairnessRegALS
 from recommender.scrapper_amazon import get_data
-from recommender.util import dataframe_to_matrix, divide_item_popularity
+from recommender.util import dataframe_to_matrix, divide_item_popularity, load_dataset
 
-columns = ['user_id', 'item_id', 'rating', 'timestamp']
-dataset_frame = pd.read_table(DATASET_DIR, sep=',', header=None,
-                              names=columns, engine='python')
+# prepare dataset
+dataset_frame = load_dataset(DATASET_DIR)
 R_dataset = dataframe_to_matrix(dataset_frame)
 users_list = dataset_frame.user_id.unique()
 
-# load als
+# load recommender
 als = FairnessRegALS.load_data(MODEL_LOCATION)
 
-
+# divide item popularity
 short_head, medium_tail = divide_item_popularity(dataset_frame)
 
 
