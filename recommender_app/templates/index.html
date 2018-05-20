@@ -37,8 +37,19 @@
                 console.log('request review asin', reviewed[i]);
                 $.get("amazon-detail/" + reviewed[i], function( data ) {
                     console.log('complete request review', data);
-                    $('#' + data['asin'] + '-title-rev').text(data['title']);
-                    $('#' + data['asin'] + '-image-rev').attr("src",data['image']);
+
+                    if(data['title'] !== null){
+                        $('#' + data['asin'] + '-title-rev').text(data['title']);
+                    } else {
+                        $('#' + data['asin'] + '-title-rev').text('');
+                    }
+
+                    if(data['image'] !==null){
+                        $('#' + data['asin'] + '-image-rev').attr("src",data['image']);
+                    } else {
+                        $('#' + data['asin'] + '-image-rev').hide();
+                    }
+
                     $('#' + data['asin'] + '-progress-rev').hide();
                 });
 
@@ -48,8 +59,19 @@
                 console.log('request recommend asin', recommended[i]);
                 $.get("amazon-detail/" + recommended[i], function( data ) {
                     console.log('complete request recommend', data);
-                    $('#' + data['asin'] + '-title').text(data['title']);
-                    $('#' + data['asin'] + '-image').attr("src",data['image']);
+
+                    if(data['title'] !== null){
+                        $('#' + data['asin'] + '-title').text(data['title']);
+                    } else {
+                        $('#' + data['asin'] + '-title').text('');
+                    }
+
+                    if(data['image'] !==null){
+                        $('#' + data['asin'] + '-image').attr("src",data['image']);
+                    } else {
+                        $('#' + data['asin'] + '-image').hide();
+                    }
+
                     $('#' + data['asin'] + '-progress').hide();
                 });
             }
@@ -75,7 +97,7 @@
           </div>
           <img class="card-img-top" src="" alt="Loading image.." id="{{ item }}-image-rev" >
           <div class="card-body">
-            <p class="card-title"><b>{{ item }}</b></p>
+            <p class="card-title"><b>ItemID: {{ item }}</b></p>
             <p class="card-text" id="{{ item }}-title-rev">-</p>
               {% if tag == "short-head" %}
                 <a href="#" class="btn btn-sm btn-secondary">{{ tag }}</a>
@@ -97,7 +119,7 @@
           </div>
           <img class="card-img-top" src="" alt="Loading image.." id="{{ rec_item }}-image" >
           <div class="card-body">
-            <p class="card-title"><b>{{ rec_item }}</b></p>
+            <p class="card-title"><b>ItemID: {{ rec_item }}</b></p>
             <p class="card-text" id="{{ rec_item }}-title">-</p>
               {% if tag == "short-head" %}
                 <a href="#" class="btn btn-sm btn-secondary">{{ tag }}</a>

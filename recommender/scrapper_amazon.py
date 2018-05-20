@@ -12,12 +12,18 @@ HEADERS = {
 
 URL = 'https://www.amazon.com/dp/'
 
+# DEBUG LOCAL
+# http://localhost:8000/amazon-detail/1196
+
 
 def get_data(asin):
     page = requests.get(URL + asin, headers=HEADERS).text
     soup = BeautifulSoup(page, "lxml")
 
-    title = soup.find("h1", {"id": "title"}).findChildren()[0].text
+    try:
+        title = soup.find("h1", {"id": "title"}).findChildren()[0].text
+    except:
+        title = None
 
     if soup.find("img", {"id": "landingImage"}) is not None:
         image_id = "landingImage"
