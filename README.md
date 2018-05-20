@@ -25,3 +25,8 @@
 * NDCG@10 (quality rank)
 * APT
 * Medium-tail coverage
+
+### How to Build
+* install package in requirements.txt
+* install static npm package for ui
+* select model & dataset in config.py
