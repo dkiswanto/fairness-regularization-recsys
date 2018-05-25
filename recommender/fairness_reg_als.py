@@ -52,7 +52,11 @@ class FairnessRegALS:
     def train_data(self, iteration, directory=None):
         for iterate in range(iteration):
             print("als train_data iteration {} at {}".format(iterate + 1, datetime.now()))
-            # P STEP: UPDATE USER VECTORS
+
+            ###################################################
+            # P STEP: UPDATE USER FACTOR
+            ###################################################
+
             # q̃ = QTs,
             # Ã = QT diag(s)Q
             q_tilde = np.zeros(self.n_factor)
@@ -66,7 +70,6 @@ class FairnessRegALS:
             # for u ← 1,..., U do ;
             # TODO: RE-CHECK THIS, IT HAS SIDE-EFFECT IN DATA-SET (R)
             cus = [i for i in range(self.n_user) if np.any(self.R[i, :])]
-
             for user in cus:
                 A_bar = np.zeros((self.n_factor, self.n_factor))
                 q_bar = np.zeros(self.n_factor)
@@ -103,9 +106,11 @@ class FairnessRegALS:
                 self.P[user, :] = pu
 
             ###################################################
-            #  CHECKPOINT - MANUALLY CHECKED                  #
+            # Q STEP: UPDATE ITEM FACTOR
             ###################################################
-            # Q STEP: UPDATE ITEM VECTORS
+
+            # TODO: REGULARIZATION 1
+
 
             # k, v -> int, double
             map_p1_tensor = {}
@@ -136,7 +141,7 @@ class FairnessRegALS:
                 map_b_tensor[user] = sum_b_tensor
                 map_p2_tensor[user] = sum_p2_tensor
 
-            # FAIRNESS REGULARIZATION
+            # TODO: REGULARIZATION 2
             # dist = lambda param1, param2: param1 + param2
             # sum_d_q = np.zeros((self.n_item, self.n_factor))
             # for item_i in range(self.n_item):
@@ -183,6 +188,9 @@ class FairnessRegALS:
 
                 # dope variable checked
                 # b_bar, p1_tensor, p2_tensor, p3_tensor, b_tensor
+
+                # TODO: REGULARIZATION 3
+
 
                 qi = np.linalg.inv(M).dot(y)
                 self.Q[item, :] = qi
