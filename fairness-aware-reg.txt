@@ -1,0 +1,8 @@
+Fairness
+- Build matrix D (dissimiliarity), for any pair items i & j, d(i,j) = 1 if i & j are in the same state, 0 otherwise
+- using ILBU (another matrix like ILD in "wasilewski")
+- Implement LAPDQ + ILBU distance
+
+notes:
+- LAP-DQ, only effect the item factors, Q, user factor is unchanged
+- Bassically Fairness-Aware Reg is LapDQ with ILBU distance

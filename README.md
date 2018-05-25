@@ -30,3 +30,8 @@
 * install package in requirements.txt
 * install static npm package for ui
 * select model & dataset in config.py
+
+## How to Run
+* manage.py (django UI)
+* training.py (training)
+* main.py (testing/evaluation)

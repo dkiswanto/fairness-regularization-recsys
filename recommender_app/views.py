@@ -23,17 +23,23 @@ als = FairnessRegALS.load_data(MODEL_LOCATION)
 
 
 def index(request, user_id):
+
+    # get recommendation
+    if als is None:
+        return HttpResponse("model recommender not loaded correctly")
+
     # get random user on each request
     if user_id is None:
         user_selected = np.random.choice(users_list)
     else:
         user_selected = user_id
 
-    # get recommendation
-    if als is None:
-        return HttpResponse("model recommender not loaded correctly")
+    try:
+        user_idx = als.user_index.get_loc(user_selected)
+    except:
+        user_selected = int(user_id)
+        user_idx = als.user_index.get_loc(user_selected)
 
-    user_idx = als.user_index.get_loc(user_selected)
     recommend, recommend_index = als.top_n_recommendation(
         user_selected, 10, with_index=True, with_reviewed=False)
 
