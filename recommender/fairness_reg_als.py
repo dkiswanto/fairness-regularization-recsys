@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import numpy as np
@@ -7,11 +8,14 @@ from recommender.util import dataframe_to_matrix, divide_item_popularity
 
 
 class FairnessRegALS:
-    def __init__(self, df_train, n_factor, user_factor=None, item_factor=None):
+    def __init__(self, df_train, df_test, n_factor,
+                 lambda_reg, user_factor=None, item_factor=None):
 
-        # get data from dataframe
-        self.data_frame = df_train
+        self.df_train = df_train
+        self.df_test = df_test
+
         R_matrix, user_index, item_index = dataframe_to_matrix(df_train, with_index=True)
+
         self.R = R_matrix
         self.user_index = user_index
         self.item_index = item_index
@@ -37,6 +41,8 @@ class FairnessRegALS:
         # self.constant_latent_factor()
 
         # check matrix shape dimension
+        # print(self.P.shape, self.Q.shape)
+        # print((self.n_user, self.n_factor), (self.n_item, self.n_factor))
         if self.P.shape != (self.n_user, self.n_factor) \
                 or self.Q.shape != (self.n_item, self.n_factor):
             raise ValueError
@@ -51,7 +57,7 @@ class FairnessRegALS:
 
         # fairness regularization attribute
         self.pre = False
-        self.lambda_reg = 0.004
+        self.lambda_reg = lambda_reg
         self.div_dot = np.zeros(self.n_item)
 
         # divide popularity-rank
@@ -319,12 +325,6 @@ class FairnessRegALS:
             # convert list recommendation to id
             return [self.item_index[item] for item in rec_item_idx]
 
-    def save_data(self, directory):
-        np.save(directory + "/P.npy", self.P)
-        np.save(directory + "/Q.npy", self.Q)
-        self.data_frame.to_pickle(directory + '/data_frame.pkl')
-        np.save(directory + "/n_factor.npy", self.n_factor)
-
     def ilbu_distance(self, i, j):
         """
         :param i: id item 1
@@ -338,17 +338,34 @@ class FairnessRegALS:
         else:
             return 0
 
-    # noinspection PyBroadException
+    def save_data(self, directory):
+        try:
+            os.listdir(directory)
+        except:
+            os.mkdir(directory)
+
+        np.save(directory + "/P.npy", self.P)
+        np.save(directory + "/Q.npy", self.Q)
+
+        self.df_train.to_pickle(directory + '/df_train.pkl')
+        self.df_test.to_pickle(directory + '/df_test.pkl')
+
+        np.save(directory + "/lambda_reg.npy", self.lambda_reg)
+        np.save(directory + "/n_factor.npy", self.n_factor)
+
     @staticmethod
     def load_data(directory):
         try:
             P = np.load(directory + "/P.npy")
             Q = np.load(directory + "/Q.npy")
-            # R = np.load(directory + "/R.npy")
-            data_frame = pd.read_pickle(directory + '/data_frame.pkl')
-            n_factor = np.load(directory + "/n_factor.npy")
 
-            return FairnessRegALS(data_frame, n_factor, P, Q)
+            df_train = pd.read_pickle(directory + '/df_train.pkl')
+            df_test = pd.read_pickle(directory + '/df_test.pkl')
+
+            n_factor = np.load(directory + "/n_factor.npy")
+            lambda_reg = np.load(directory + "/lambda_reg.npy")
+
+            return FairnessRegALS(df_train, df_test, n_factor, lambda_reg, P, Q)
         except Exception:
             return None
 

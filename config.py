@@ -5,7 +5,7 @@
 # movielens
 # DATASET_DIR = '/home/g40/PycharmProjects/finaltask-project/dataset/ml-1m/ratings_min_30.dat'
 # DATASET_DELIMITER = '::'
-# MODEL_LOCATION = 'save_data/movielens_1m_min30'
+# MODEL_LOCATION = 'save_data/movielens_1m_min30_1.0E-5'
 # SHORT_HEAD_BOUND = 400  # movielens min 30
 
 

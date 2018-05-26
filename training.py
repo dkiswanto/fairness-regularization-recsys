@@ -4,6 +4,11 @@ from config import MODEL_LOCATION, DATASET_DIR
 from recommender.fairness_reg_als import FairnessRegALS
 from recommender.util import load_dataset, dataframe_to_matrix
 
+# Training Constant Parameter
+N_FACTOR = 50
+ITERATION = 30
+LAMBDA_REG = 0
+
 
 def main():
 
@@ -27,10 +32,13 @@ def main():
               .format(train.shape[0], test.shape[0]))
 
         # create new recommender instance
-        als = FairnessRegALS(df_train=train, n_factor=50)
+        als = FairnessRegALS(df_train=train,
+                             df_test=test,
+                             n_factor=N_FACTOR,
+                             lambda_reg=LAMBDA_REG)
 
     # train the recommender
-    als.train_data(iteration=1, directory=MODEL_LOCATION)
+    als.train_data(iteration=ITERATION, directory=MODEL_LOCATION)
     als.save_data(MODEL_LOCATION)
 
 if __name__ == '__main__':
