@@ -1,6 +1,6 @@
 import pandas as pd
 
-from config import DATASET_DELIMITER
+from config import DATASET_DELIMITER, SHORT_HEAD_BOUND
 
 
 def load_dataset(data_dir):
@@ -11,16 +11,18 @@ def load_dataset(data_dir):
     return df
 
 
-def divide_item_popularity(dataset_frame):
-    # set short-head rating limit bound
-    # SHORT_HEAD_BOUND = 85 #???
-    SHORT_HEAD_BOUND = 400  # movielens min 30
+def divide_item_popularity(dataset_frame, short_head_bound=SHORT_HEAD_BOUND):
+    """
+    :param dataset_frame: pandas dataframe
+    :param short_head_bound: int
+    :return: short_head & medium_tail set of ID ITEM
+    """
 
     item_series = dataset_frame.item_id.value_counts()
     short_head = set()
     medium_tail = set()
     for item_id, count in item_series.iteritems():
-        if count > SHORT_HEAD_BOUND:
+        if count > short_head_bound:
             short_head.add(item_id)
         else:
             medium_tail.add(item_id)

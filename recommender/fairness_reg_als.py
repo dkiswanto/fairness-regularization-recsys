@@ -3,7 +3,7 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 
-from recommender.util import dataframe_to_matrix
+from recommender.util import dataframe_to_matrix, divide_item_popularity
 
 
 class FairnessRegALS:
@@ -48,6 +48,14 @@ class FairnessRegALS:
             support_value = np.count_nonzero(self.R[:, item_idx]) if self.is_support_weight else 1
             self.support_weight_vector[item_idx] = support_value
             self.support_weight_sum += support_value
+
+        # fairness regularization attribute
+        self.pre = False
+        self.lambda_reg = 0.004
+        self.div_dot = np.zeros(self.n_item)
+
+        # divide popularity-rank
+        self.short_head, self.medium_tail = divide_item_popularity(df_train)
 
     def train_data(self, iteration, directory=None):
         for iterate in range(iteration):
@@ -109,8 +117,16 @@ class FairnessRegALS:
             # Q STEP: UPDATE ITEM FACTOR
             ###################################################
 
-            # TODO: REGULARIZATION 1
-
+            # FAIRNESS REGULARIZATION 1
+            if not self.pre:
+                for id_i in self.item_index:
+                    idx = self.item_index.get_loc(id_i)
+                    distance_items = 0
+                    for id_j in self.item_index:
+                        distance_items += self.ilbu_distance(id_i, id_j)
+                    self.div_dot[idx] = distance_items
+                self.pre = True
+            # END REGULARIZATION 1
 
             # k, v -> int, double
             map_p1_tensor = {}
@@ -141,14 +157,22 @@ class FairnessRegALS:
                 map_b_tensor[user] = sum_b_tensor
                 map_p2_tensor[user] = sum_p2_tensor
 
-            # TODO: REGULARIZATION 2
+            # REGULARIZATION 2
             # dist = lambda param1, param2: param1 + param2
-            # sum_d_q = np.zeros((self.n_item, self.n_factor))
-            # for item_i in range(self.n_item):
-            #     for item_j in range(self.n_item):
-            #         # update sum_d_q
-            #         for x, y in np.nditer([sum_d_q[item_i], self.Q[item_j]], op_flags=['readwrite']):
-            #             x[...] = dist(x, y)
+            sum_d_q = np.zeros((self.n_item, self.n_factor))
+            for id_i in self.item_index:
+                idx_i = self.item_index.get_loc(id_i)
+                for id_j in self.item_index:
+                    idx_j = self.item_index.get_loc(id_j)
+
+                    # update sum_d_q
+                    sum_d_q[idx_i] = sum_d_q[idx_i] + self.ilbu_distance(id_i, id_j) * self.Q[idx_j]
+
+                    # method 2 update sum_d_q, unchecked & untested
+                    # for x, y in np.nditer([sum_d_q[item_i], self.Q[item_j]], op_flags=['readwrite']):
+                    #    x[...] = dist(x, y)
+
+            # END REGULARIZATION 2
 
             # for each item
             for item in range(self.n_item):
@@ -189,8 +213,13 @@ class FairnessRegALS:
                 # dope variable checked
                 # b_bar, p1_tensor, p2_tensor, p3_tensor, b_tensor
 
-                # TODO: REGULARIZATION 3
-
+                # REGULARIZATION 3
+                # div_reg = np.zeros(self.n_factor)
+                div_qi = self.Q[item]
+                div_reg = sum_d_q[item]
+                div_reg = div_reg - div_qi * self.div_dot[item]
+                y = y + (self.lambda_reg * div_reg)
+                # END REGULARIZATION 3
 
                 qi = np.linalg.inv(M).dot(y)
                 self.Q[item, :] = qi
@@ -295,6 +324,19 @@ class FairnessRegALS:
         np.save(directory + "/Q.npy", self.Q)
         self.data_frame.to_pickle(directory + '/data_frame.pkl')
         np.save(directory + "/n_factor.npy", self.n_factor)
+
+    def ilbu_distance(self, i, j):
+        """
+        :param i: id item 1
+        :param j: id item 2
+        :return: for any pair of items i and j, dist(i,j)=1 if i & j are in the same set, 0 otherwise
+        """
+        if (i in self.short_head) and (j in self.short_head):
+            return 1
+        elif (i in self.medium_tail) and (j in self.medium_tail):
+            return 1
+        else:
+            return 0
 
     # noinspection PyBroadException
     @staticmethod

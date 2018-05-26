@@ -5,6 +5,10 @@ from recommender.evaluation import medium_tail_test, apt_test, ndcg_test
 from recommender.fairness_reg_als import FairnessRegALS
 from recommender.util import load_dataset, divide_item_popularity, dataframe_to_matrix
 
+"""
+    IMPORTANT MESSAGE
+    ALWAYS CREATE MODEL IN training.py
+"""
 
 def main():
 
@@ -23,6 +27,7 @@ def main():
     R_ratings = dataframe_to_matrix(ratings_df)
 
     # load recommender model
+    # WARNING: ONLY CREATE MODEL IN training.py
     als = FairnessRegALS.load_data(MODEL_LOCATION)
     if als is None:
         raise Exception('recommender model not found, please check load dir')
