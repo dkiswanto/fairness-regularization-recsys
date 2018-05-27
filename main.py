@@ -1,5 +1,3 @@
-from sklearn.model_selection import train_test_split
-
 from config import DATASET_DIR, MODEL_LOCATION
 from recommender.evaluation import medium_tail_test, apt_test, ndcg_test
 from recommender.fairness_reg_als import FairnessRegALS
@@ -11,7 +9,7 @@ from recommender.util import load_dataset, divide_item_popularity, dataframe_to_
 """
 
 
-def main():
+def main(session):
 
     # load dataset
     ratings_df = load_dataset(DATASET_DIR)
@@ -22,7 +20,7 @@ def main():
 
     # load recommender model
     # WARNING: ONLY CREATE MODEL IN training.py
-    als = FairnessRegALS.load_data(MODEL_LOCATION)
+    als = FairnessRegALS.load_data(MODEL_LOCATION + "-{}".format(session))
     if als is None:
         raise Exception('recommender model not found, please check load dir')
 
@@ -41,6 +39,11 @@ def main():
     ndcg_value = ndcg_test(als, user_idx_test, R_ratings)
     print("ndcg value {}".format(ndcg_value))
 
+    # model info
+    print("lambda reg {}".format(als.lambda_reg))
+    print("n factor {}".format(als.n_factor))
 
 if __name__ == '__main__':
-    main()
+    for session in range(1,10):
+        main(session)
+        print("session testing: {} done\n".format(session))

@@ -5,15 +5,17 @@ from recommender.fairness_reg_als import FairnessRegALS
 from recommender.util import load_dataset, dataframe_to_matrix
 
 # Training Constant Parameter
-N_FACTOR = 50
-ITERATION = 30
-LAMBDA_REG = 0
+N_FACTOR = 20
+ITERATION = 10
+LAMBDA_REG = 0.00001
 
 
-def main():
+def main(session):
+
+    model_location = MODEL_LOCATION + "-{}".format(session)
 
     # load from previous model
-    als = FairnessRegALS.load_data(MODEL_LOCATION)
+    als = FairnessRegALS.load_data(model_location)
 
     # create new if isn't available
     if als is None:
@@ -35,11 +37,12 @@ def main():
         als = FairnessRegALS(df_train=train,
                              df_test=test,
                              n_factor=N_FACTOR,
-                             lambda_reg=LAMBDA_REG)
+                             lambda_reg=LAMBDA_REG * session)
 
     # train the recommender
-    als.train_data(iteration=ITERATION, directory=MODEL_LOCATION)
-    als.save_data(MODEL_LOCATION)
+    als.train_data(iteration=ITERATION, directory=model_location)
+    als.save_data(model_location)
 
 if __name__ == '__main__':
-    main()
+    for session in range(1,10):
+        main(session)
