@@ -1,40 +1,6 @@
-import math
-from operator import itemgetter
-
 import numpy as np
 
 from recommender.fairness_reg_als import FairnessRegALS
-
-
-# def disc(i):
-#     return 1 if i <= 2 else math.log2(i)
-#
-#
-# def ndcg(R_dataset, recommendation_list, user_id):
-#     # That is, the discount is set to be zero for ranks larger than k.
-#     # Such NDCG measure is usually referred to as NDCG@k.
-#     dcg = 0.0
-#
-#     for i, item in enumerate(recommendation_list):
-#         actual_value = R_dataset[user_id - 1, item - 1]
-#         dcg += actual_value / disc(i + 1)
-#
-#     # compute perfect dcg
-#     all_r_user = R_dataset[user_id - 1]
-#     rating_value = all_r_user[recommendation_list - 1]
-#     indices = list(zip(recommendation_list, rating_value))
-#     perfect_list = sorted(indices, key=itemgetter(1), reverse=True)
-#
-#     dcg_perfect = 0.0
-#     for i, item in enumerate(perfect_list):
-#         idx, rating = item
-#         dcg_perfect += rating / disc(i + 1)
-#
-#     # Discount Account
-#     # 1 / log(1+r), log is base 2
-#     if dcg_perfect == 0:
-#         return 1
-#     return dcg / dcg_perfect
 
 
 def dcg_at_k(r, k, method=0):
@@ -91,26 +57,15 @@ def medium_tail_test(recommender: FairnessRegALS, user_test, medium_tail_set):
     that are recommended to any user in the test data. 
     'Controlling Popularity Bias in Learning-to-Rank Recommendation'- RecSys 17
     """
-    medium_data = {}
+    medium_data = set()
     for user in user_test:
         recommendation_list = recommender.top_n_recommendation(user, 10)
         # print("user {} recommend {}".format(user, recommendation_list))
         for item in recommendation_list:
-            if item in medium_tail_set:
-                if medium_data.get(item) is None:
-                    medium_data[item] = 1
-                else:
-                    medium_data[item] += 1
+            if item in medium_tail_set and is_test_data(recommender.df_test, user, item):
+                medium_data.add(item)
 
-    medium_count = 0
-    total_user_test = len(user_test)
-    for key in medium_data:
-        # it means, every medium tail item has appear in every user test
-        if medium_data.get(key) == total_user_test:
-            medium_count += 1
-    print("max medium tail item", max(medium_data.values()))
-    print("total user test", total_user_test)
-    return medium_count
+    return len(medium_data)
 
 
 def apt_test(recommender: FairnessRegALS, user_test, medium_tail_set):
@@ -121,12 +76,22 @@ def apt_test(recommender: FairnessRegALS, user_test, medium_tail_set):
 
         recommendation_list = recommender.top_n_recommendation(user, 10)
 
-        # medium_item = set.intersection(set(recommendation_list), medium_tail_set)
-        # print(user, len(medium_item), len(recommendation_list))
         total_medium_item = 0
+        rec_count = 0
         for item in recommendation_list:
-            if item in medium_tail_set:
-                total_medium_item += 1
+            if is_test_data(recommender.df_test, user, item):
+                rec_count += 1
+                if item in medium_tail_set:
+                    total_medium_item += 1
 
-        sum_medium += total_medium_item / len(recommendation_list)
+        if rec_count != 0:
+            sum_medium += total_medium_item / rec_count
+        else:
+            num_user_test -= 1
+
     return sum_medium / num_user_test
+
+
+def is_test_data(df, user_id, item_id):
+    result = df.loc[(df.user_id == user_id) & (df.item_id == item_id)]
+    return len(result) == 1
