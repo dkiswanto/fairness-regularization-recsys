@@ -3,6 +3,7 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+import pathlib
 
 from recommender.util import dataframe_to_matrix, divide_item_popularity
 
@@ -339,10 +340,7 @@ class FairnessRegALS:
             return 0
 
     def save_data(self, directory):
-        try:
-            os.listdir(directory)
-        except:
-            os.mkdir(directory)
+        pathlib.Path(directory).mkdir(parents=True, exist_ok=True)
 
         np.save(directory + "/P.npy", self.P)
         np.save(directory + "/Q.npy", self.Q)
