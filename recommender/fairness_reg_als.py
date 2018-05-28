@@ -62,9 +62,12 @@ class FairnessRegALS:
         self.div_dot = np.zeros(self.n_item)
 
         # divide popularity-rank
-        self.short_head, self.medium_tail = divide_item_popularity(df_train)
+        self.short_head, self.medium_tail = None, None
 
-    def train_data(self, iteration, directory=None):
+    def train_data(self, iteration, short_head, medium_tail, directory=None):
+
+        self.short_head, self.medium_tail = short_head, medium_tail
+
         for iterate in range(iteration):
             print("als train_data iteration {} at {}".format(iterate + 1, datetime.now()))
 
@@ -332,6 +335,9 @@ class FairnessRegALS:
         :param j: id item 2
         :return: for any pair of items i and j, dist(i,j)=1 if i & j are in the same set, 0 otherwise
         """
+        if (self.short_head is None) or (self.medium_tail is None):
+            raise Exception
+
         if (i in self.short_head) and (j in self.short_head):
             return 1
         elif (i in self.medium_tail) and (j in self.medium_tail):

@@ -2,12 +2,15 @@ from sklearn.model_selection import train_test_split
 
 from config import MODEL_LOCATION, DATASET_DIR
 from recommender.fairness_reg_als import FairnessRegALS
-from recommender.util import load_dataset, dataframe_to_matrix
+from recommender.util import load_dataset, dataframe_to_matrix, divide_item_popularity
 
 # Training Constant Parameter
-N_FACTOR = 20
-ITERATION = 10
-LAMBDA_REG = 0.00001
+N_FACTOR = 50
+ITERATION = 1
+LAMBDA_REG = 0.000001
+
+# prepare dataset
+RATINGS_DF = load_dataset(DATASET_DIR)
 
 
 def main(session):
@@ -20,12 +23,10 @@ def main(session):
     # create new if isn't available
     if als is None:
 
-        # prepare dataset
-        ratings_df = load_dataset(DATASET_DIR)
-        train, test = train_test_split(ratings_df, test_size=0.2)
+        train, test = train_test_split(RATINGS_DF, test_size=0.2)
 
         print("total user dataset: {}, item dataset: {}"
-              .format(ratings_df.user_id.unique().shape, ratings_df.item_id.unique().shape))
+              .format(RATINGS_DF.user_id.unique().shape, RATINGS_DF.item_id.unique().shape))
         print("total user training: {}, item training: {}"
               .format(train.user_id.unique().shape, train.item_id.unique().shape))
         print("total user test: {}, item test: {}"
@@ -40,9 +41,12 @@ def main(session):
                              lambda_reg=LAMBDA_REG * session)
 
     # train the recommender
-    als.train_data(iteration=ITERATION, directory=model_location)
+    short_head, medium_tail = divide_item_popularity(RATINGS_DF)
+    als.train_data(iteration=ITERATION, directory=model_location,
+                   short_head=short_head, medium_tail=medium_tail)
     als.save_data(model_location)
 
 if __name__ == '__main__':
     for session in range(1,10):
         main(session)
+        print("session training: {} done\n".format(session))
