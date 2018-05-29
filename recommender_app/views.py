@@ -1,10 +1,9 @@
 import numpy as np
-import pandas as pd
 
 from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render
 
-from config import DATASET_DIR, MODEL_LOCATION
+from config import DATASET_DIR
 from recommender.evaluation import ndcg_at_k
 from recommender.fairness_reg_als import FairnessRegALS
 from recommender.scrapper_amazon import get_data
@@ -19,7 +18,9 @@ users_list = dataset_frame.user_id.unique()
 short_head, medium_tail = divide_item_popularity(dataset_frame)
 
 # load recommender
-als = FairnessRegALS.load_data(MODEL_LOCATION)
+# hardcode location existing model
+MODEL_DIR = 'saved_model/amazon_books_f50_e06_i30/reg-9'
+als = FairnessRegALS.load_data(MODEL_DIR)
 
 
 def index(request, user_id):
