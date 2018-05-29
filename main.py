@@ -20,9 +20,13 @@ def main(session):
 
     # load recommender model
     # WARNING: ONLY CREATE MODEL IN training.py
-    als = FairnessRegALS.load_data(MODEL_LOCATION + "-{}".format(session))
+    model_location = MODEL_LOCATION + "-{}".format(session)
+    als = FairnessRegALS.load_data(model_location)
+
     if als is None:
-        raise Exception('recommender model not found, please check load dir')
+        raise Exception('recommender model {} not found, please check directory'.format(model_location))
+
+    print("model {} loaded".format(model_location))
 
     # prepare user test
     user_idx_test = als.df_test.user_id.unique()
@@ -44,6 +48,6 @@ def main(session):
     print("n factor {}".format(als.n_factor))
 
 if __name__ == '__main__':
-    for session in range(1,10):
+    for session in range(1, 10):
         main(session)
         print("session testing: {} done\n".format(session))

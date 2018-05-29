@@ -41,12 +41,13 @@ def main(session):
                              lambda_reg=LAMBDA_REG * session)
 
     # train the recommender
+    print("model {}-{} will be trained".format(MODEL_LOCATION, session))
     short_head, medium_tail = divide_item_popularity(RATINGS_DF)
     als.train_data(iteration=ITERATION, directory=model_location,
                    short_head=short_head, medium_tail=medium_tail)
     als.save_data(model_location)
 
 if __name__ == '__main__':
-    for session in range(1,10):
+    for session in range(1, 10):
         main(session)
         print("session training: {} done\n".format(session))

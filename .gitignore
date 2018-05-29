@@ -206,9 +206,7 @@ venv.bak/
 .mypy_cache/
 
 .idea/
-*.npy
 save_data/
-*.pkl
 
 # End of https://www.gitignore.io/api/python,pycharm,jetbrains
 
